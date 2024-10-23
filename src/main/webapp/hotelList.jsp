@@ -45,9 +45,10 @@
     a {
         background-color: #87CEEB;
         color: white;
-        padding: 8px 12px;
+        padding: 10px 20px; /* Increased padding */
         text-decoration: none;
         border-radius: 4px;
+        display: inline-block;
         transition: background-color 0.3s;
     }
     a:hover {
@@ -63,6 +64,10 @@
         text-align: center;
         color: #d9534f;
         font-size: 18px;
+    }
+    /* New styling for the "Book" column to prevent congestion */
+    td.book-column {
+        width: 150px; /* Set a fixed width for the book column */
     }
 </style>
 </head>
@@ -101,7 +106,9 @@
                 <td><%= hotel.getHotellocation() %></td>
                 <td><%= hotel.getHoteltype() %></td>
                 <td><%= hotel.getHotelPayment() %></td>
-                <td><a href="Book.jsp?hotel_id=<%= hotel.getHotel_id() %>&user_id=<%= user.getUser_id() %>">Book Now</a></td>
+                <td class="book-column">
+                    <a href="Book.jsp?hotel_id=<%= hotel.getHotel_id() %>&user_id=<%= user.getUser_id() %>">Book Now</a>
+                </td>
             </tr>
             <%
                         }

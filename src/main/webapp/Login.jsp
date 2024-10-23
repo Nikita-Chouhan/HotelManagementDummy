@@ -12,7 +12,11 @@
         margin: 0;
         padding: 0;
     }
+    .form-container {
+        margin-top: 50px;
+    }
     table {
+        width: 400px; /* Fixed width to make inputs fit */
         margin-top: 50px;
         background-color: white;
         border-collapse: collapse;
@@ -23,7 +27,7 @@
         text-align: left;
     }
     input[type="text"], input[type="password"] {
-        width: 100%;
+        width: 94%; /* Adjust width to fit inside table */
         padding: 8px;
         margin: 5px 0;
         border: 1px solid #ccc;
@@ -40,9 +44,6 @@
     }
     input[type="submit"]:hover {
         background-color: #45a049;
-    }
-    .form-container {
-        margin-top: 50px;
     }
     a {
         text-decoration: none;
@@ -66,11 +67,11 @@
       <input type="hidden" name="user_id">
       <tr>
         <td><b>Email:</b></td>
-        <td><input type="text" name="email" placeholder="Enter your Email"><br><br></td>
+        <td><input type="text" name="email" placeholder="Enter your Email"></td>
       </tr>
       <tr>
         <td><b>Password:</b></td>
-        <td><input type="password" name="password" placeholder="Enter your password"><br><br></td>
+        <td><input type="password" name="password" placeholder="Enter your password"></td>
       </tr>
       <tr>
         <td colspan="2"><span class="error"></span></td>

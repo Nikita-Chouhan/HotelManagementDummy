@@ -1,16 +1,13 @@
 package in.mindprove.hotelmanagement.controlller;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import in.mindprove.hotelmanagement.dto.Userdto;
-import in.mindprove.hotelmanagement.dto.roomDto;
 import in.mindprove.hotelmanagement.service.UserService;
-import in.mindprove.hotelmanagement.util.databaseConnectionUtil;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -24,83 +21,92 @@ public class UserController extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		Userdto u = new Userdto();
+		String target = "/Signup.jsp";
+		boolean hasErrors = false;
 		
-		u.setUser_id(Integer.parseInt(request.getParameter("user_id")));
-		u.setname(request.getParameter("name"));
-		u.setemail(request.getParameter("email"));
-		u.setAddress(request.getParameter("address"));
-		u.setcontactnumber(request.getParameter("contact"));
-		u.setpassword(request.getParameter("password"));
-		u.setRole(request.getParameter("role"));
+		// Input validations
+		String userIdStr = request.getParameter("user_id");
+		String name = request.getParameter("name");
+		String email = request.getParameter("email");
+		String address = request.getParameter("address");
+		String contact = request.getParameter("contact");
+		String password = request.getParameter("password");
+		String role = request.getParameter("role");
 
-//		boolean isError = false;
-//		if(name==null || name.trim().length()==0) {
-//			isError = true;
-//		}
-//		
-//		if(email == null || email.trim().length()==0)
-//		{
-//		    isError=true;	
-//		}
-//		if( password == null || password.trim().length()==0)
-//		{
-//		    isError=true;	
-//		}
-//		if(confirm_password == null || confirm_password.trim().length()==0 || confirm_password!=password)
-//		{
-//		    isError=true;	
-//		}
-//		RequestDispatcher rd= null;
-//	    if(isError==true)
-//	    {
-//	    	rd=request.getRequestDispatcher("Signup.jsp");
-//	    }
-//	    else {
+		List<String> errors = new LinkedList<>();
+
+		
+		if (name == null || name.isEmpty()) {
+			errors.add("Name is required.");
+		}
+
+		if (!isValidEmail(email)) {
+			errors.add("Invalid email format.");
+		}
+
+		if (address == null || address.isEmpty()) {
+			errors.add("Address is required.");
+		}
+
+		if (!isValidContact(contact)) {
+			errors.add("Invalid contact number. Must be 10 digits.");
+		}
+
+		if (password == null || password.length() < 6) {
+			errors.add("Password must be at least 6 characters long.");
+		}
+
+		if (!errors.isEmpty()) {
+			request.setAttribute("errors", errors);
+			RequestDispatcher rd = getServletContext().getRequestDispatcher(target);
+			rd.forward(request, response);
+			return;
+		}
+
+		// If no errors, proceed with saving user info
+		Userdto u = new Userdto();
+		u.setname(name);
+		u.setemail(email);
+		u.setAddress(address);
+		u.setcontactnumber(contact);
+		u.setpassword(password);
+		u.setRole(role);
+
 		UserService db = new UserService();
 		int x = db.saveSignUpInfo(u);
-		String target = "";
 
 		if (x >= 1) {
 			request.setAttribute("sms", "Signup Successfully");
 			target = "/Index.jsp";
 		} else {
-			request.setAttribute("sms", "Invalid Username/Password");
-			target = "/Login.jsp";
+			request.setAttribute("sms", "Error during signup.");
+			target = "/Signup.jsp";
 		}
-		// RequestDispatcher dispatcher = request.getRequestDispatcher(target);
 		RequestDispatcher rd = getServletContext().getRequestDispatcher(target);
 		rd.forward(request, response);
 		
-		HttpSession session = request.getSession();
-		session.setAttribute("user_id", u.getUser_id());
+		
 	}
-//	public int autoGenerate() {
-//	    int Id =0;
-//
-//	    try (Connection con = databaseConnectionUtil.getConnection()) {
-//	        con.setAutoCommit(false);
-//	        
-//	        String selectQuery = "SELECT MAX(Id) FROM user"; 
-//	        try (PreparedStatement ps = con.prepareStatement(selectQuery);
-//	             ResultSet rs = ps.executeQuery()) {
-//
-//	            if (rs.next()) {
-//	                int maxId = rs.getInt(1);
-//	                if (maxId > 0) {
-//	                    Id = maxId + 1;
-//	                }
-//	            }
-//	        }
-//	        
-//	        // Commit transaction
-//	        con.commit();
-//	        
-//	    } catch (Exception e) {
-//	        e.printStackTrace(); // Consider using a proper logger instead of printing the stack trace
-//	    }
-//
-//	    return Id;
-//	}
 
+	// Method to validate email using regex
+	private boolean isValidEmail(String email) {
+		String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+		Pattern pattern = Pattern.compile(emailRegex);
+		if (email == null) {
+			return false;
+		}
+		Matcher matcher = pattern.matcher(email);
+		return matcher.matches();
+	}
+
+	// Method to validate contact number (e.g., should be 10 digits)
+	private boolean isValidContact(String contact) {
+		String contactRegex = "\\d{10}";
+		Pattern pattern = Pattern.compile(contactRegex);
+		if (contact == null) {
+			return false;
+		}
+		Matcher matcher = pattern.matcher(contact);
+		return matcher.matches();
+	}
 }
